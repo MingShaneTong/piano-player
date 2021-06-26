@@ -76,13 +76,8 @@ class Piano:
             curr += 12
         return black_midi
 
-    def draw(self, game_display):
-        """
-        Draws the piano on the game display
-        :param game_display: display to draw into
-        :return:
-        """
-        w, h = game_display.get_size()
+    def get_dimension(self, display):
+        w, h = display.get_size()
 
         # find the scale of the piano
         board_width = w - Piano.MARGIN * 2
@@ -113,12 +108,33 @@ class Piano:
                 # black key draw halfway between white keys
                 dimensions[key] = pygame.Rect(cx + black_shift, cy, black_width, black_height)
                 pass
+        return dimensions
 
+    def draw(self, display):
+        """
+        Draws the piano on the game display
+        :param display: display to draw into
+        :return:
+        """
+        dimensions = self.get_dimension(display)
         # draw keys onto game display
         for key in self.white_keys:
-            key.draw(game_display, dimensions[key])
+            key.draw(display, dimensions[key])
         for key in self.black_keys:
-            key.draw(game_display, dimensions[key])
+            key.draw(display, dimensions[key])
+
+    def draw_black(self, display):
+        """
+        Draws the piano on the game display
+        :param display: display to draw into
+        :return:
+        """
+        dimensions = self.get_dimension(display)
+        # draw keys onto game display
+        for key in self.white_keys:
+            key.draw(display, dimensions[key])
+        for key in self.black_keys:
+            key.draw(display, dimensions[key])
 
 
 class Key(ABC):

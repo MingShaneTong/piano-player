@@ -30,15 +30,10 @@ def main(file):
     pygame.display.set_caption("Piano Player")
     p = Piano()
 
-    # convert msgs into list
-    msgs = []
-    for msg in mid:
-        msgs.append(msg)
-
     # play the piano
+    update_display(game_display, p)
     pygame.mixer.music.load(file)
-    pygame.mixer.music.play()
-    status = play_piano(game_display, msgs, p)
+    status = play_piano(game_display, mid, p)
     if not status:
         pygame.quit()
         quit()
@@ -52,37 +47,27 @@ def main(file):
                 quit()
 
 
-def play_piano(display, msgs, piano):
-    # main loop
-    end = False
-    index = 0
-    while not end:
+def play_piano(display, mid, piano):
+    pygame.mixer.music.play()
+
+    for msg in mid:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
 
-        # press on the key
-        pressed = []
-        holdtime = 0
-        press_end = False
-        while not press_end:
-            if index >= len(msgs):
-                end = True
-                press_end = True
-            else:
-                msg = msgs[index]
-                if not msg.is_meta and msg.type == 'note_on':
-                    pressed.append(piano.keys[msg.note])
-                    if msg.time > 0:
-                        holdtime = msg.time
-                        press_end = True
-                index += 1
+        if not msg.is_meta:
+            if msg.type == 'note_on' or msg.type == 'note_off':
+                print(msg)
+                key = piano.keys[msg.note]
+                # press or unpress key
+                key.press()
+                if msg.type == 'note_off' or msg.velocity <= 0:
+                    key.unpress()
 
-        # hold the keys then release
-        press(pressed)
-        update_display(display, piano)
-        time.sleep(holdtime)
-        unpress(pressed)
+                # display update
+                time.sleep(msg.time)
+                update_display(display, piano)
+
     return True
 
 
@@ -96,26 +81,6 @@ def update_display(display, piano):
     display.fill(WHITE)
     piano.draw(display)
     pygame.display.update()
-
-
-def press(keys):
-    """
-    Unpress the keys
-    :param keys:
-    :return:
-    """
-    for key in keys:
-        key.press()
-
-
-def unpress(keys):
-    """
-    Unpress the keys
-    :param keys:
-    :return:
-    """
-    for key in keys:
-        key.unpress()
 
 
 if __name__ == '__main__':
